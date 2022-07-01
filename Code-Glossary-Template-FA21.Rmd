@@ -1,0 +1,865 @@
+---
+title: "Code Glossary"
+author: "Phineas Pham"
+date: "8/27/2021"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+
+data <- read.csv("CausesOfDeath_France_2001-2008.csv")
+```
+
+## Code Glossary for DA 101
+This is an R Markdown document. Please fill in all example text with your own words and definitions. For each function in the code glossary, you should show your code. If you need extra code to do some data wrangling or bring in a new library, please hide it from the rendered html. Each term should have: 
+ (1) what package does it come from?
+ (2) general definition - what does the function do and for what kind of tasks/situations would you use it?
+ (3) worked example, using your dataset, or one of the example datasets from an R package
+ (4) text below the example that explains specifically, what the code accomplished. In other words, what was the input and the output? What can you do now that you have run the example that you couldn't before?
+
+### Data Wrangling
+
+#### 0. Explain what **"tidy data"** is and why it is useful for coding.
+
+Definition:
+Tidy data is a universal way to structure the dataset. The data is tidy when it follows the rules and standards so that it is more understandable and readable. Data analysts are not working on their own, the field require extensive collaboration. Thus, tidy data is extremely useful for coding, when people can understand each other's work. The anlyzing process would be more efficient when the data set is clear, understandable, and collaboraters can quickly understand other's work, which follows a universal structure.
+
+Three rules of a tidy dataset:
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+
+Code example (show an example dataset preview or header that you can use to explain):
+```{r}
+head(data)
+```
+Explanation:
+
+This dataset is tidy as it meets the rules of a tidy dataset:
+
+Each column is a variable type: Each column contains a variable type such as "TIME", "SEX", "AGE", etc.
+Each row is a seperate observation: each row contains information of an incident in a specific time, geographic, sex, age, value.
+Each cell contains one value like age: each cell only contains only a value related to its variable type and observation
+
+---
+
+#### 1. Compare and contrast `summary`, `str`, and `glimpse`
+
+"summary"
+Package: base
+
+Definition: "summary" is a function that produce a brief overview of the dataset. It produces a statistic summary with key values like mean, 1st quartile, median, mean, 3rd quartile, min, max.
+
+Code example:
+```{r}
+summary(data)
+```
+
+"str"
+Package: utils
+
+Definition: "str", which stands for structure, is the function that provides a structural summary of the dataset. It includes the variable types, data type, and some of the first values provided on a row of their variable name. The function also provides the number of observations and variables of the dataset. 
+
+Code example:
+```{r}
+str(data)
+```
+
+"glimpse"
+Package: dplyr
+
+Definition: "glimpse" is an another summary function that shows the number of rows and columns. Different from str function, glimpse function gives the variable names on a column and each row contains as many as possible values of the variable on the first column. We use glimpse to see as many values as possible in a specific amount of space.
+
+Code example:
+```{r}
+glimpse(data)
+```
+
+Explanation: 
+
+All of the three functions show a summary of the dataset, but each of them can be used differently, based on our purpose. We use summary function to get the key statistic values from the dataset, like mean, 1st quartile of the first variable, also datatype and length of other variables. Like in the example above, we can get the min and max value of variable "TIME", and the length of observations for each variable.
+To know the structure of the dataset (its variables, datatype, and a few values), we use str function. It gives us the summary of the structure of the dataset.
+The glimpse function gives all of the variables in the first column and gives us as many values as possible. Although glimpse has quite the same output of sstr function, we get a lot more values for each variables from the glimpse function than str function.
+---
+
+**Demonstrate each of the main `dplyr` verbs in Questions 2-7. In your examples, these may be used alone or together with other functions, but your definition and explanation must focus specifically on the function in the prompt.**
+
+#### 2. Use `select` to manipulate a dataframe
+
+Package: dplyr
+
+Definition: Use to only select out the specific columns from the dataset. It is very helpful in circumstances that we just need values from a few columns of the dataset, maybe to view or analysis.
+
+Code example:
+```{r}
+select_data <- data %>% 
+  select("TIME", "GEO", "ICD10", "Value")
+
+head(select_data)
+```
+
+Explanation: By choosing some function names, select function can choose out only a few variables listed in the function from the dataset. In the example above, I can use select function to get a new dataset that was based on the original one but just include "TIME", "GEO", "ICD10", and "Value" variables. By using these, I can draw graphs, do analysis on the variables that are related to my question and do not have to always look at a big dataset with unnecessary values.
+
+---
+
+#### 3. Use `arrange` to manipulate a dataframe
+
+Package: dplyr
+
+Definition: arrange function is used to arrange the observations in the dataset in an order that specified. By mentioning the variable name, we can have the observations ordered based on the its value on the variable type put in the dataset. 
+
+Code example:
+```{r}
+arrange_data <- data %>% 
+  arrange(TIME)
+head(arrange_data)
+```
+
+```{r}
+arrange_reverse_data <- data %>% 
+  arrange(desc(TIME))
+head(arrange_reverse_data)
+```
+
+Explanation: 
+
+To have the time of a cause of death, I use arrange function to have it sorted in a ascending or descending order. But to have the data sorted in a descending order, we must use desc() function inside arrange function. In the second example above, I have a list of observations where the values from TIME variable are descinding from year 2008 to 2001. Thus, I can see the last year of the dataset and see what is happening in a closest year, which in this dataset is 2008.
+
+---
+
+#### 4. Use `filter` to manipulate a dataframe 
+
+Package: dplyr
+
+Definition: This function helps us get the observations that meet the logical condition described in the function. This function is very useful when we have a condition that we only want the values that meet certain criterias that we want.
+
+Code example:
+```{r}
+filter_data <- data %>% 
+  filter(SEX == "Males")
+head(filter_data)
+```
+
+Explanation: 
+
+For example, if we want to just have the data on male population to do a research on a vaccine, we use filter function like above to filter out the observations for males. Furthermore, we can use "&" or "|" for "and" and "or" logical statement to add more condition to filter out.
+
+---
+
+#### 5. Use `mutate` to manipulate a dataframe
+
+Package: dplyr
+
+Definition: The mutate function is used to create new columns/variables to the dataset, which based on existing variables. Mutate function would be useful when we need adjustments to the variables without removing the old ones.  
+
+Code example:
+```{r}
+mutate_data <- data %>% 
+  mutate("SEX_Initial" = substr(SEX,0,1))
+
+head(mutate_data)
+```
+
+Explanation: 
+
+In the example above, I use mutate function to create a new variable named "SEX_Initial" based on the "SEX" variable. With this new variable I can better look and analyze the data when the "Males" and "Females" categories are now only written as "M" and "F" respectively. Furthermore, mutate can also help create new variables where I can better use for calculation for analysis.
+
+---
+
+#### 6. Use `group_by` to manipulate a dataframe
+
+Package: dplyr
+
+Definition: This function is used to group values in a variable to categorize them. In a variable we chose, the function will group the observations that have the same value on the chosen variable. Then we can do better calculation on stastistic summary with these groups.
+
+Code example:
+```{r}
+group_data <- data %>% 
+  group_by(ICD10)
+head(group_data)
+```
+```{r}
+group_summarize_data <- data %>% 
+  group_by(ICD10) %>% 
+  summarize(sum_Males = sum(SEX == "Males"), sum_Females = sum(SEX == "Females"))
+head(group_summarize_data)
+```
+
+Explanation: 
+
+In the first example, I use group_by function to group the observations that have the same cause of death in France together. Thus, the output shows no difference. But when I use group_by with summarize function, I can see in the dataset how many "Males" and "Females" observations are there. The output shows 8 "Males" and 8 "Females", which is maybe true because there are 8 years included in the dataset, so maybe in each year the data provides the death number of "Females" and "males" for each cause. 
+
+---
+
+
+#### 7. Use `summarize` to manipulate a dataframe
+
+Package: dplyr
+
+Definition: This function will help us summarize the observations in a new column. Or when used with group_by function, it can help us calculate statistic summary of the observations on the groups that we created before.
+
+Code example:
+
+Example 1:
+```{r}
+summarize_data <- data %>% 
+  summarize(ICD10)
+head(summarize_data)
+```
+Example 2:
+```{r}
+group_summarize_data <- data %>% 
+  group_by(ICD10) %>% 
+  summarize(sum_Males = sum(SEX == "Males"), sum_Females = sum(SEX == "Females"))
+head(group_summarize_data)
+```
+
+Explanation: 
+
+In the first example, I can get a list of the causes of death in France. But when I use it with group_by function in example 2, I can actually count the number of "Males" and "Females" on each causes of death. This is because as we grouped the causes of death with function group_by, then we can use summarize to do some statistic summary on those groups, which in this case is calculating the number the cause appears in the dataset with "Male" or "Female" population.
+
+---
+
+#### 8. Remove NAs from a data frame or from a column
+
+**na.omit**
+Package: stats
+
+Definition: This function is used to eliminate the NAs value from the data set or from a specific column. Thus, we can better perform analysis on the dataset, as NAs value cause troubles to our analysis and result.
+
+Code example:
+
+```{r}
+Na_data <- na.omit(data)
+Na_data
+```
+
+Example 2: 
+
+```{r}
+Na_starwars <- na.omit(starwars)
+Na_starwars
+```
+
+Explanation: 
+
+In the example 1, we used na.omit function to eliminate all the rows that have missing values. However, as all of the last row contains missing values, all of the data is deleted. For example 2, we can get a new data frame where all the missing values are deleted.
+
+---
+
+#### 9. Use conditional statements to manipulate a dataframe
+**`ifelse`**
+
+Package: base
+
+Definition: ifelse is a conditional statement formatted as ifelse(test, yes, no). If the test is True, the statement will do what assigned in yes part, and if the test is False, the statement will do what is inputted in no part.
+
+Code example:
+```{r}
+ifelse_starwars <- starwars %>% 
+  mutate(check = ifelse(height > 180, "Tall", "Not tall"))
+
+ifelse_starwars
+```
+
+Explanation: I created a new dataset from starwars dataset, with a new column "check", which will contain the "Tall" value if the character's height is higher than 180 cm, else it will show "Not tall".
+
+---
+
+#### 10. Bring multiple datasets together by stacking them
+**`rbind`**
+
+Package: base
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+#### 11. Bring multiple datasets together using `merge` and/or `join`
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+#### 12. Use Regular Expressions or `stringr` functions to manipulate text data
+**`function_name`**
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+#### 13. Transform and work with datetime values
+**`function_name`**
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+#### 14. Write your own function to automate a task
+**`function`**
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+
+
+### Polished Data Visualization using ggplot2
+**All visuals should use functions from the `ggplot2` and/or `ggmap` libraries
+
+#### 15. Histogram
+
+Package: ggplot2
+
+Definition: This function is used to create a histogram based on the chosen variables of the dataset. It takes in quantitative variables on x axis and put quantitative on y axis (count value)
+
+Code example:
+```{r}
+ggplot(starwars, aes(height)) +
+  geom_histogram(color="black", fill="lightblue") +
+  labs(title= 'The height of the starwar characters',
+  caption='This histogram shows the distribution of the starwars characters', 
+  x = 'Height (cm)', y= 'Number of characters (count)') 
+
+  
+```
+
+Explanation: 
+
+The histogram above shows the distribution of the height of the starwars character. It takes in 'height' variable, and count the number of each height value in the dataset. Also, I can adjust the visual of the graph by adding functions like "color," "fill," or "labs".
+
+---
+
+#### 16. Frequency Polygon
+
+Package: ggplot2
+
+Definition: This function creates a polygon frequency which shows the frequency of the categorical variables. It takes in categorical variabels and the number of counts of those variables
+
+Code example:
+```{r}
+ggplot(starwars, aes(height)) +
+  geom_freqpoly(color="blue") +
+  labs(title= 'The frequency of height of the starwar characters',
+  caption='This frequency polygon shows the distribution of the height of starwars characters', 
+  x = 'Height (cm)', y= 'Number of characters (count)') 
+```
+
+Explanation: The frequency polygon above shows the frequency of different height numbers that characters have. It takes in 'height' variable, and count the number of each height value in the dataset. Then, the graph draws a line that connects those count value. Also, I can adjust the visual of the graph by adding functions like line color or caption.
+
+---
+
+#### 17. Box plot
+
+Package: ggplot2
+
+Definition: Function geom_boxplot() is used to create a boxplot. It takes in a quanlitative and quantitative variables. We can use boxplot to see distribution or compare between groups
+
+Code example:
+```{r}
+starwars
+```
+
+```{r}
+ggplot(starwars, aes(x = sex, y = height)) +
+  geom_boxplot(color="black", fill="lightblue") +
+  labs(title='Compare the sex and height of characters in Star War', 
+  caption = 'The boxplot shows the distribution of sex and height of characters in Star War',
+  x = "Sex", y = "Height (m)")
+```
+
+Explanation: 
+
+The boxplot above helps us look at the distribution of the characters in terms of their sex and height. We can also see the median height of each sex type of the characters by looking at the black line crossing the boxes. Furthermore, we can see the min, max values of height for each sex, and we can conclude that the male characters, on average, are taller than other sex characters.
+
+---
+
+#### 18. Scatter plot
+
+Package: ggplot2
+
+Definition: The function geom_point creates a scatter plot, taking in two quantitative variables. We can use scatter plot to see the correlation between two variables.
+
+Code example:
+```{r}
+ggplot(starwars, aes(height, mass)) +
+  geom_point()+
+  geom_smooth(method = 'lm', linetype=1) +
+  labs(title = 'The scatter plot for two variables height and mass of the characters in Star War',
+  x='Height', y='Mass')
+```
+
+Explanation: 
+
+The scatter plot above shows a positive relation ship of the characters in Star Wars. Thanks to the line of best fit which is draw with function geom_smooth(), we can see a quite flat relation ship of these two variables. Thus, we can conclude that the increase in height of the characters barely increase the mass of the characters.
+
+---
+
+#### 19. Line plot
+
+Package: ggplot2
+
+Definition: This function will draw a line graph, by taking in two quantitative variables. This graph mainly shows the changes through time of the variables it takes in.
+
+Code example:
+```{r}
+congr <- read_csv("congress_data.csv")
+congr <- congr %>% 
+  mutate(congr, year = 1789 + (congress-1)*2)
+
+perc_id_represent <- congr %>%
+  filter(chamber == "House") %>% 
+  group_by(year, congress, chamber, id_cat) %>%
+  dplyr::summarize(id_cat_total = n()) %>%
+  group_by(year, congress, chamber) %>%
+  mutate(count=sum(id_cat_total)) %>%
+  arrange(congress) %>%
+  mutate(percent = round((id_cat_total/count)*100, 2))
+
+perc_id_represent %>% 
+  arrange(congress)
+
+ggplot(perc_id_represent, aes(x = year, y=percent, color = id_cat))+
+  geom_line()+
+  labs(title = "The change of identity category in House through time", 
+       x = "Year", y = "Number of representatives",
+       caption = "The line graphs show the change of percentage of representatives \n from different identity categories in House and Senate chambers\n
+       The vertical lines show the important event that may cause the changes to the trends.")+
+  #facet_wrap(~chamber)+
+  theme_minimal()
+```
+
+Explanation: The code above set up the data and draw out the line graph, showing the changes through time of voting trend of House members, categorised by their identity. By using geom_line and other commands, I can draw line graph with title, caption, or different line with different colors in a same graph, characterized by different identity groups.
+
+---
+
+#### 20. Your favorite other kind of ggplot, not yet demonstrated
+**Grouped boxplot**
+
+Package: ggplot2
+
+Definition: Grouped boxplot is a boxplot that boxes are grouped and subgrouped. The group is called in x argument,a quantitative in y argument, and the subgroup is called in the fill argument
+
+Code example:
+```{r}
+ggplot(starwars, aes(x=eye_color, y=height, fill=gender, na.rm = TRUE)) + 
+  geom_boxplot() +
+  facet_wrap(~eye_color, scale="free") +
+  labs(title = "The distribution of characters' mass for the characters' eye color and gender", x = "Eye color", y = "Height")
+```
+
+Explanation: 
+
+The grouped boxplot above shows the height of the characters when categorized as their eye color and gender. We can make some assumption based on the above grouped boxplot like: the ones who have black eyes are normally about 180m height and there are more black-eye masculine-gender than feminine-gender characters. Most red-eyes are masculine-gender with the median height is 180 cm.
+
+---
+
+#### 21. Map; `map()`
+
+Package: purrr
+
+Definition: This function is used to apply a function for every element of the input. Then, it returns a vector with the same length as the input that amplied the function in its syntax: map(.x,.y,...). x is the input and y is the function
+
+Code example:
+```{r}
+array <- list(c(1,2,3),c(4,5,6))
+map(array, mean)
+```
+
+Explanation: In the above code block, I created a list of 2 lists of 3 integers. Then, with map() function, I can calulate means of those two lists with a function.
+
+---
+
+#### 21b. Geographical map
+
+Package: ggplot2
+
+Definition: This function plots the data in a map. It is really helpful by visualizing the data on a map.
+
+Code example:
+```{r}
+## Set up library and dataset
+# modified from `geom_map()` examples, part "Better example"
+library(maps)
+library(ggplot2)
+
+crimes <- data.frame(state = tolower(rownames(USArrests)), USArrests)
+
+# Equivalent to crimes %>% tidyr::pivot_longer(Murder:Rape)
+vars <- lapply(names(crimes)[-1], function(j) {
+  data.frame(state = crimes$state, variable = j, value = crimes[[j]])
+})
+crimes_long <- do.call("rbind", vars)
+
+states_map <- map_data("state")
+
+## Draw the map with geom_map
+# current example, leave in
+ggplot(crimes, aes(map_id = state)) +
+  geom_map(aes(fill = Murder), map = states_map) +
+  expand_limits(x = states_map$long, y = states_map$lat)
+```
+
+Explanation: The code above helps us create a U.S. map that is colored by the number of murder case in each state. It is done by using geom_map() with fill function and states_map dataset (which has the longtitude and latitude data of each state).
+
+
+---
+#### 22. a polished table using `kable`, `xtable`, or `pander`**
+**`function_name`**
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+
+
+### Statistical and Analytical Tools
+
+#### 23. Demonstrate how you could calculate all of these key summary statistics and describe what you can learn from them:
+`mean`, `median`, `max`, `min`, `interquartile range`, `standard deviaton`
+**You may choose to use one or more functions or code statements to demonstrate and explain**
+
+Package: base R
+
+Definition: 
+Mean, median, maximum value, minimum value, interquartile range, standard deviaton are calculated by mean, median, max, min, IQR, sd functions
+Mean, max, min are the sum average, maximum, minimum values.
+Median is the middle value when the values are sorted in an order
+Interquartile range is the difference between its 75th and 25th percentiles.
+Standard deviation demonstrates the spread of the set of the data.
+
+Code example:
+Mean:
+```{r}
+mean(starwars$height,na.rm = TRUE)
+```
+
+Median:
+```{r}
+median(starwars$height,na.rm = TRUE)
+```
+
+Max:
+```{r}
+max(starwars$height,na.rm = TRUE)
+```
+
+Min:
+```{r}
+min(starwars$height,na.rm = TRUE)
+```
+
+Interquartile range:
+```{r}
+IQR(starwars$height,na.rm = TRUE)
+```
+
+Standard deviaton:
+```{r}
+sd(starwars$height,na.rm = TRUE)
+```
+Explanation: 
+
+The key summary statistics above are calculated by using the function name, and putting the variable in, following the format. I put the data name and use $ syntax to get to the column after, and use na.rm = TRUE to remove missing values. I am surprised that the highest character is 264 cm. The shortest character is 66 cm, which I thought there are some characters in Star War is even shorter, but maybe they are not listed in the dataset.
+
+---
+
+#### 24. One sample t-test
+
+Package: stats
+
+Definition: One sample t-test is used to compare the means of the population to a pre-determined value, which most often is 0. It gives us important statistic values like mean, degree of freedom, t-value, p-value, confidence interval to analyze how the mean of the population is.
+
+Code example:
+```{r}
+t.test(starwars$height)
+```
+
+Explanation: By using t.test() function, I can see the mean of height values of starwars characters. As the p-value is 2.2e-16, much smaller than 0.05, I can reject the null hypothesis and accept that the true mean of the starwars characters' heights are not equal to 0. It also shows that the mean of heights are 174.358 cm, 95% of the characters listed are in range 166.6697 to 182.0464 cm. 
+
+---
+
+#### 25. Two sample t-test
+
+Package: stats 
+
+Definition: Two sample t-test is almost the same as one sample t-test, but instead of comparing means of a dataset to a pre-determined value, this one compare 2 means from 2 dataset. It also gives us important statistic values like mean, degree of freedom, t-value, p-value, confidence interval to analyze how the means of the two  population differ from each other
+
+Code example:
+```{r}
+maleStarwars <- starwars %>%
+  filter(sex=="male")
+femaleStarwars <- starwars %>%
+  filter(sex=="female")
+
+t.test(maleStarwars$height, femaleStarwars$height)
+```
+
+Explanation: In the code above, I compare the means of the male to female starwars character to see if there is a statiscally difference. The t-test gives us a p-value of 0.1181 (higher than 0.05), implies that the height difference between two groups are not big. Also we can get the mean of males character are 179.1053 cm, while the mean of females' height is 169.2667 cm.
+
+
+---
+
+#### 26. Compare and contrast Correlation versus Correlation Test 
+**`cor(x,y)` and `cor.test(x,y)`**
+
+Package: stats
+
+Definition: cor() function is used to find the correlation of two variables. The result we get from cor() function will range from -1 to 1, from strongly negative to strongly positive relationship. Meanwhile, cor.test() function gives more information to examine the correlation between two variables, including t-value, degree of freedom, p-value, 95% confidence interval and correlation value.
+
+Code example:
+```{r}
+library(fivethirtyeight)
+#head(candy_rankings)
+
+cor(candy_rankings$sugarpercent, candy_rankings$pricepercent)
+
+cor.test(candy_rankings$sugarpercent, candy_rankings$pricepercent)
+
+```
+
+Explanation: The code above shows the correlation between sugar percent and price percent in the candys. While the cor() function only shows the correlation value, cor.test() shows other values like degree of freedom of 83, 95% confidence interval ranges from 0.1253935 to 0.5071910, t-value of 3.1817, and significant p-value of 0.00206 (which support the hypothesis that true correlation is not equal to 0). 
+
+---
+
+#### 27. Simple linear regression (bivariate)
+**`lm(y ~ x, data)`**
+
+Package: stats
+
+Definition: lm() function is used to create a linear regression model about the relation of the predictor variable x with the dependent variable y. It also provides some useful statistic values about regression like t-value, p-value, R-squared, slope, intercept, residuals, etc. 
+
+Code example:
+```{r}
+quant_mod1 <- lm(winpercent ~ sugarpercent, data=candy_rankings)
+summary(quant_mod1)
+```
+
+Explanation: The code above store the linear regression model to quant_mod variable and then I use summary(quant_mod) to show all the outputs. I can use these values to assess the relation ship between winning percentage and sugarpercent. For example, with R-squared of 0.04109, I can conclude that only 4.1% of the variables' winpercent can be predicted by sugarpercent value.
+
+---
+
+#### 28. Multiple linear regression (multivariate)
+**`lm(y ~ x1 + x2 + ..., data)`**
+
+Package: stats
+
+Definition: Multiple linear regression is used to create linear regression model about the relation of more than 1 predictor variables x, x1, x2, etc. with the dependent variable y. It also provides some useful statistic values about regression like t-value, p-value, R-squared, slope, intercept, residuals, etc.
+
+Code example:
+```{r}
+quant_mod2 <- lm(winpercent ~ sugarpercent + pricepercent, data=candy_rankings)
+summary(quant_mod2)
+```
+
+Explanation: The code above store the linear regression model to quant_mod variable and then I use summary(quant_mod) to show all the outputs. I can use these values to assess the relation ship between winning percentage to sugarpercent and pricepercent. For example. with R-squared of 0.113, I can conclude that only 11.3% of the variables' winpercent can be predicted by sugarpercent and pricepercent values.
+
+---
+
+#### 29. Multicollinearity
+**`ggpairs`**
+
+Package: GGally
+
+Definition: ggpairs() function is used to get the relation between not only predictor variables to dependent variable but also the relationships between predictor variables. This test gives us the ability to check the model with its variables.
+
+Code example:
+```{r}
+#Set up library
+library(GGally)
+
+#Using ggpairs
+ggpairs(airquality, columns =c("Temp", "Wind", "Month"))
+```
+
+Explanation: For the code above, I can see if the predictors are correlated with each other in airquality dataset, for this example is whether Temp, Wind, and Month values are correlated to each other. With 3 variables, I get 9 (3x3) graphs from using ggpairs(). 
+
+---
+
+#### 30. Validate your model
+**`autoplot`**
+
+Package: ggplot2
+
+Definition: autoplot() function can be used to draw particular plots for objects it got. It is helpful as we don't have to define ourselves which graph to choose, it will automatically pick a kind of plot for us based on the variable types.
+
+Code example:
+```{r}
+library(ggplot2)
+library(ggfortify)
+autoplot(quant_mod1)
+
+```
+
+Explanation: 
+
+---
+
+#### 31. Make a histogram of your residuals
+**`gg_diagnose`**
+
+Package: lindia
+
+Definition: gg_diagnose() is used to check if the model is good by checking the normality of the residuals. Thus, with this function, I can see how the residuals from the model populate and check the validation of the model.
+
+Code example:
+```{r}
+#Set up library and data
+library(lindia)
+full_mod <- lm(winpercent ~ chocolate + fruity+caramel+peanutyalmondy+nougat+crispedricewafer+hard+bar+pluribus+sugarpercent+pricepercent, data= candy_rankings)
+
+plots <- gg_diagnose(full_mod, plot.all=FALSE)
+
+#Look at a histogram of the residuals
+plots$residual_hist
+```
+
+Explanation: by using gg_diagnose, I can see many graphs on residuals of this linear regression model (if I run only plots command). These are helpful to check whether there is any error to the model. Like for the histogram of residuals (if I specify and run plots$residual_hist command), I can see the means of residuals is about 0, which signs this is a good one.
+
+---
+
+#### 32. Make predictions using `predict`
+
+Package: stats
+
+Definition: predict() function is used to predict the result from an input variable. It is based on a data frame or linear regression model where statistal values can be calculated for the prediction.
+
+Code example:
+```{r}
+sugar_list <- data.frame(sugarpercent = c(0.8, 0.5, 0.2))
+predict(quant_mod1, sugar_list)
+
+```
+
+Explanation: Above I use prediction function, which takes in linear model quant_mod1 I created above and a list of sugarpercent which I want to see the winpercent on. As I created a list of sugarpercent of 0.8, 0.5, and 0.2, I get 3 results 54.14853, 50.57137, and 46.99421. These are the predictions based on a model and the hypothesis I have those sugarpercent values, respectively.
+
+---
+
+#### 33. Interpret predictions using `confint`
+
+Package: stats
+
+Definition: confint() function is used to get the 95% confidence intervals of the parameters in a model. It is used when our focus is just the 95% confidence intervals
+
+Code example:
+```{r}
+confint(quant_mod1)
+```
+
+Explanation: By using confint() function and quant_mod1 model created, I can get the 95% confidence intervals of the correlations of sugarpercent to winpercent. Most of the correlations fall in between 0.8660272 and 22.98170.
+
+---
+
+#### 34. Shapiro-wilk test
+**`function_name`**
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+#### 35. Non-constant variance test
+**`function_name`**
+
+Package: 
+
+Definition: 
+
+Code example:
+```{r}
+
+```
+
+Explanation: 
+
+---
+
+#### 36. Stepwise model selection using `stepAIC` and `modelaic$anova` output
+
+Package: MASS
+
+Definition: stepAIC() function is used to conduct stepwise regression method by AIC, which could tells us which of the models has the best fit. If used with 'modelaic$anov', it allows us to compare AIC of our initial model and other models created by taking away predictor variables. Thus, we can choose the best model for prediction. 
+
+Code example:
+```{r}
+#Set up library and model
+library(MASS)
+mod5 <- lm(Ozone ~ Temp + Wind+ Month, data = airquality)
+
+#Using stepwise model selection
+selectmod <-stepAIC(mod5)
+selectmod$anova
+```
+
+Explanation: Firstly, I have to import library MASS to use this function, and create mod5 as the model to input to this function. I stored my function's result in selectmod variable. And then to fully display the result, I called 'selectmod$anova.' The Initial model is the model I created above, and final model is the suggested model by R. In this case, I have both initial and final models same as each other, so this is a good model.
+
+---
+
